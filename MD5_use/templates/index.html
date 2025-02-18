@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>文件完整性校验</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f7f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #157e64;
+        }
+
+        .intro {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        .intro h2 {
+            margin-top: 0;
+        }
+
+        .intro p {
+            margin-bottom: 15px;
+        }
+
+        form {
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #157e64;
+        }
+
+        .form-group input[type="file"],
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+
+        .output {
+            margin-top: 10px;
+        }
+
+        .output input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            background-color: #f7f7f7;
+            margin-right: 5px;
+        }
+
+        .output button {
+            padding: 10px 20px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status.modified {
+            color: #d9534f;
+        }
+
+        .status.verified {
+            color: #5cb85c;
+        }
+
+        .divider {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+    <script>
+        function copyToClipboard() {
+            var md5Value = document.getElementById("md5Value");
+            md5Value.select();
+            md5Value.setSelectionRange(0, 99999); /* For mobile devices */
+            document.execCommand("copy");
+            alert("MD5值已复制到剪贴板: " + md5Value.value);
+        }
+    </script>
+</head>
+<body>
+    <h1>文件完整性校验</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        <h2>计算MD5值</h2>
+        <div class="form-group">
+            <label for="calculate_file">选择文件：</label>
+            <input type="file" name="calculate_file" required>
+        </div>
+        <input type="submit" name="calculate" value="计算MD5值">
+
+        {% if md5 %}
+            <div class="output">
+                <label>计算得到的MD5值：</label>
+                <input type="text" id="md5Value" value="{{ md5 }}" readonly>
+                <button type="button" onclick="copyToClipboard()">复制</button>
+            </div>
+        {% endif %}
+    </form>
+
+    <div class="divider"></div>
+
+    <form method="post" enctype="multipart/form-data">
+        <h2>校验完整性</h2>
+        <div class="form-group">
+            <label for="verify_file">选择文件：</label>
+            <input type="file" name="verify_file" required>
+        </div>
+        <div class="form-group">
+            <label for="verify_md5">输入MD5值：</label>
+            <input type="text" name="verify_md5" placeholder="输入MD5值" required>
+        </div>
+        {% if md5 and user_md5 %}
+            {% if is_modified is not none %}
+                {% if is_modified %}
+                    <p class="status modified">文件已被修改！</p>
+                {% else %}
+                    <p class="status verified">文件未被修改。</p>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        <input type="submit" name="verify" value="校验完整性">
+    </form>
+
+    <div class="intro">
+        <hr>
+        <h2>MD5算法介绍</h2>
+        <p>
+            MD5（Message Digest Algorithm 5）是一种常用的哈希算法，用于计算文件的摘要信息。
+            它将任意长度的数据转换为固定长度的（通常是128位）摘要值，称为MD5值。
+            MD5值具有唯一性，即使文件的一丁点内容发生改变，其MD5值也会完全不同。
+        </p>
+        <h2>应用使用功能</h2>
+        <p>
+            这个应用提供两个功能：
+        </p>
+        <ol>
+            <li>计算文件的MD5值：用户可以选择一个文件，点击“计算MD5值”按钮，应用会计算并显示文件的MD5值。</li>
+            <li>校验文件的完整性：用户可以选择一个文件和输入一个MD5值，点击“校验完整性”按钮，应用会判断文件是否被修改。</li>
+        </ol>
+    </div>
+
+</body>
+</html>
